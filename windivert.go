@@ -2,7 +2,6 @@ package godivert
 
 import (
 	"errors"
-	"fmt"
 	"syscall"
 	"unsafe"
 	"runtime"
@@ -100,7 +99,6 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 		uintptr(unsafe.Pointer(&packetLen)))
 
 	if success == 0 {
-		fmt.Println("EINSATZ")
 		return nil, err
 	}
 
