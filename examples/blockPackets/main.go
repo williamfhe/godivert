@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/williamfhe/godivert"
 	"net"
 	"time"
+	"github.com/williamfhe/godivert"
 )
 
 var cloudflareDNS = net.ParseIP("1.1.1.1")
@@ -17,7 +17,7 @@ func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packe
 }
 
 func main() {
-	winDivert, err := godivert.NewWinDivertHandle("true")
+	winDivert, err := godivert.NewWinDivertHandle("icmp")
 	if err != nil {
 		panic(err)
 	}

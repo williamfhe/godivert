@@ -11,13 +11,13 @@ var icmpv4, icmpv6, udp, tcp, unknown, served uint
 
 func checkPacket(wd *godivert.WinDivertHandle, packetChan  <- chan *godivert.Packet) {
 	for packet := range packetChan {
-		served++
 		countPacket(packet)
 		wd.Send(packet)
 	}
 }
 
 func countPacket(packet *godivert.Packet) {
+	served++
 	switch packet.NextHeaderType() {
 	case header.ICMPv4:
 		icmpv4++

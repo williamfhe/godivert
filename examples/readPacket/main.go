@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/williamfhe/godivert"
 	"fmt"
+	"github.com/williamfhe/godivert"
 )
 
 func main() {

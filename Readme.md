@@ -56,12 +56,14 @@ Note that all packets diverted are guaranteed to match the filter given in **god
 
 ## Examples
 
+### Capturing and Printing a Packet
+
 ```go
 package main
 
 import (
-    "github.com/williamfhe/godivert"
     "fmt"
+    "github.com/williamfhe/godivert"
 )
 
 func main() {
@@ -85,13 +87,15 @@ func main() {
 
 Wait for a packet and print it.
 
+## Blocking Protocol by IP
+
 ```go
 package main
 
 import (
-    "github.com/williamfhe/godivert"
     "net"
     "time"
+    "github.com/williamfhe/godivert"
 )
 
 var cloudflareDNS = net.ParseIP("1.1.1.1")
@@ -105,7 +109,7 @@ func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packe
 }
 
 func main() {
-    winDivert, err := godivert.NewWinDivertHandle("true")
+    winDivert, err := godivert.NewWinDivertHandle("icmp")
     if err != nil {
         panic(err)
     }
@@ -122,7 +126,15 @@ func main() {
 }
 ```
 
-Forbid all packets to reach 1.1.1.1 for 1 minute.
+Forbid all ICMP packets to reach 1.1.1.1 for 1 minute.
+
+Try it :
+
+```bash
+ping 1.1.1.1
+```
+
+### Packet Count
 
 ```go
 package main
