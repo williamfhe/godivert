@@ -33,8 +33,8 @@ packet, err := winDivert.Recv()
 You can then choose to send the packet or modify it.
 
 ```go
-packet.SetDstPort(1234) // Set the destination port
-packet.Send(winDivert) // Send the packet back on the network stack
+packet.SetDstPort(1234) // Sets the destination port
+packet.Send(winDivert) // Sends the packet back on the network stack
 ```
 
 You can get and set values from the packet's header by using the **_header_** package. Documentation on this package can be found [Here](https://godoc.org/github.com/williamfhe/godivert/header)
@@ -122,4 +122,74 @@ func main() {
 }
 ```
 
-Forbid all packets to reach 1.1.1.1
+Forbid all packets to reach 1.1.1.1 for 1 minute.
+
+```go
+package main
+
+import (
+    "fmt"
+    "time"
+    "github.com/williamfhe/godivert"
+    "github.com/williamfhe/godivert/header"
+)
+
+var icmpv4, icmpv6, udp, tcp, unknown, served uint
+
+func checkPacket(wd *godivert.WinDivertHandle, packetChan  <- chan *godivert.Packet) {
+    for packet := range packetChan {
+        countPacket(packet)
+        wd.Send(packet)
+    }
+}
+
+func countPacket(packet *godivert.Packet) {
+    served++
+    switch packet.NextHeaderType() {
+    case header.ICMPv4:
+        icmpv4++
+    case header.ICMPv6:
+        icmpv6++
+    case header.TCP:
+        tcp++
+    case header.UDP:
+        udp++
+    default:
+        unknown++
+    }
+}
+
+
+func main() {
+    winDivert, err := godivert.NewWinDivertHandle("true")
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println("Starting")
+
+    packetChan, err := winDivert.Packets()
+    if err != nil {
+        panic(err)
+    }
+
+
+    n := 50
+    for i := 0; i < n; i++ {
+        go checkPacket(winDivert, packetChan)
+
+    }
+
+    time.Sleep(15 * time.Second)
+
+    winDivert.Close()
+    fmt.Println("Stopping...")
+
+    fmt.Printf("Served: %d packets\n", served)
+
+    fmt.Printf("ICMPv4=%d ICMPv6=%d UDP=%d TCP=%d Unknown=%d", icmpv4, icmpv6, udp, tcp, unknown)
+}
+
+```
+
+Count all protocols passing by for 15 seconds.
