@@ -9,8 +9,8 @@ import (
 	"errors"
 )
 
-// ICMPv4Header : Represents a ICMPv6 header
-// See https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_for_IPv6#Message_types_and_formats
+// Represents a ICMPv6 header
+// https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol_for_IPv6#Message_types_and_formats
 type ICMPv6Header struct {
 	Raw      []byte
 	Modified bool
@@ -37,7 +37,7 @@ func (h *ICMPv6Header) String() string {
 		"\t}", h.Type(), h.Code(), ICMPv6HeaderLen, h.Checksum(), h.Body())
 }
 
-// Type : Read the header's bytes and returns the type
+// Reads the header's bytes and returns the type
 func (h *ICMPv6Header) Type() uint8 {
 	return h.Raw[0]
 }
@@ -47,7 +47,7 @@ func (h *ICMPv6Header) SetType(hType uint8) {
 	h.Raw[0] = hType
 }
 
-// Type : Read the header's bytes and returns the type
+// Reads the header's bytes and returns the type
 func (h *ICMPv6Header) Code() uint8 {
 	return h.Raw[1]
 }
@@ -57,7 +57,7 @@ func (h *ICMPv6Header) SetCode(code uint8) {
 	h.Raw[1] = code
 }
 
-// Body : Read the header's bytes and returns the body (Rest of the Header)
+// Reads the header's bytes and returns the body (Rest of the Header)
 func (h *ICMPv6Header) Body() uint32 {
 	return binary.BigEndian.Uint32(h.Raw[4:8])
 }
@@ -70,37 +70,37 @@ func (h *ICMPv6Header) SetBody(body uint32) {
 	h.Raw[7] = uint8(body & 0xff)
 }
 
-// Checksum : Read the header's bytes and returns the Checksum
+// Reads the header's bytes and returns the Checksum
 func (h *ICMPv6Header) Checksum() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[2:4])
 }
 
-// HeaderLen : Returns the length of the header in bytes (8 bytes)
+// Returns the length of the header in bytes (8 bytes)
 func (h *ICMPv6Header) HeaderLen() uint8 {
 	return ICMPv6HeaderLen
 }
 
-// SrcPort : Not used for ICMPv6
+// Not used for ICMPv6
 func (h *ICMPv6Header) SrcPort() (uint16, error) {
 	return 0, errors.New("ICMPv6 header has no source port")
 }
 
-// DstPort : Not used for ICMPv6
+// Not used for ICMPv6
 func (h *ICMPv6Header) DstPort() (uint16, error) {
 	return 0, errors.New("ICMPv6 header has no destination port")
 }
 
-// SetSrcPort : Not used for ICMPv6
+// Not used for ICMPv6
 func (h *ICMPv6Header) SetSrcPort(port uint16) error {
 	return errors.New("ICMPv6 header has no source port")
 }
 
-// SetDstPort : Not used for ICMPv6
+// Not used for ICMPv6
 func (h *ICMPv6Header) SetDstPort(port uint16) error {
 	return errors.New("ICMPv6 header has no destination port")
 }
 
-// NeedNewChecksum : Returns true if the header has been modified
+// Returns true if the header has been modified
 func (h *ICMPv6Header) NeedNewChecksum() bool {
 	return h.Modified
 }

@@ -6,8 +6,8 @@ import (
 	"net"
 )
 
-// IPv4Header : Represents a IPv4 Header
-// See : https://en.wikipedia.org/wiki/IPv4#Header
+// Represents a IPv4 Header
+// https://en.wikipedia.org/wiki/IPv4#Header
 type IPv4Header struct {
 	Raw      []byte
 	Modified bool
@@ -44,67 +44,67 @@ func (h *IPv4Header) String() string {
 		h.Version(), h.HeaderLen(), h.TOS(), h.TotalLen(), h.ID(), h.Flags(), h.FragOff(), h.TTL(), nextHeader, ProtocolName(nextHeader), checksum, h.SrcIP(), h.DstIP())
 }
 
-// Version : Returns the IP Version
+// Returns the IP Version
 func (h *IPv4Header) Version() int {
 	return IPv4
 }
 
-// HeaderLen : Reads the header's bytes and returns its length
+// Reads the header's bytes and returns its length
 func (h *IPv4Header) HeaderLen() uint8 {
 	return (h.Raw[0] & 0xf) << 2
 }
 
-// TOS : Reads the header's bytes and returns the Type Of Service
+// Reads the header's bytes and returns the Type Of Service
 func (h *IPv4Header) TOS() uint8 {
 	return h.Raw[1]
 }
 
-// TotalLen : Reads the header's bytes and returns the total length of the packet
+// Reads the header's bytes and returns the total length of the packet
 func (h *IPv4Header) TotalLen() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[2:4])
 }
 
-// ID : Reads the header's bytes and returns the ID
+// Reads the header's bytes and returns the ID
 func (h *IPv4Header) ID() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[4:6])
 }
 
-// Flags : Reads the header's bytes and returns the flags
+// Reads the header's bytes and returns the flags
 func (h *IPv4Header) Flags() uint8 {
 	return h.Raw[6] >> 5
 }
 
-// FragOff : Reads the header's bytes and returns the Fragment Offset
+// Reads the header's bytes and returns the Fragment Offset
 func (h *IPv4Header) FragOff() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[6:8]) & 0x7f
 }
 
-// TTL : Reads the header's bytes and returns the Time To Live of the packet
+// Reads the header's bytes and returns the Time To Live of the packet
 func (h *IPv4Header) TTL() uint8 {
 	return h.Raw[8]
 }
 
-// NextHeader : Reads the header's bytes and returns the protocol number
+// Reads the header's bytes and returns the protocol number
 func (h *IPv4Header) NextHeader() uint8 {
 	return h.Raw[9]
 }
 
-// Checksum : Reads the header's bytes and returns the Checksum
+// Reads the header's bytes and returns the Checksum
 func (h *IPv4Header) Checksum() (uint16, error) {
 	return binary.BigEndian.Uint16(h.Raw[10:12]), nil
 }
 
-// SrcIP : Reads the header's bytes and returns the source IP
+// Reads the header's bytes and returns the source IP
 func (h *IPv4Header) SrcIP() net.IP {
 	return net.IPv4(h.Raw[12], h.Raw[13], h.Raw[14], h.Raw[15])
 }
 
-// DstIP : Reads the header's bytes and returns the destination IP
+// Reads the header's bytes and returns the destination IP
 func (h *IPv4Header) DstIP() net.IP {
 	return net.IPv4(h.Raw[16], h.Raw[17], h.Raw[18], h.Raw[19])
 }
 
-// Options : Reads the header's bytes and returns the options as a byte slice if they exist or nil
+// Reads the header's bytes and returns the options as a byte slice if they exist or nil
 func (h *IPv4Header) Options() []byte {
 	hdrLen := h.HeaderLen()
 	if hdrLen == 20 {
@@ -114,19 +114,19 @@ func (h *IPv4Header) Options() []byte {
 	return h.Raw[IPv4HeaderLen:hdrLen]
 }
 
-// SetSrcIP : Sets the source IP of the packet
+// Sets the source IP of the packet
 func (h *IPv4Header) SetSrcIP(ip net.IP) {
 	h.Modified = true
 	copy(h.Raw[12:16], ip[12:16])
 }
 
-// SetDstIP : Sets the destination IP of the packet
+// Sets the destination IP of the packet
 func (h *IPv4Header) SetDstIP(ip net.IP) {
 	h.Modified = true
 	copy(h.Raw[16:20], ip[12:16])
 }
 
-// NeedNewChecksum : Returns true if the header has been modified
+// Returns true if the header has been modified
 func (h *IPv4Header) NeedNewChecksum() bool {
 	return h.Modified
 }

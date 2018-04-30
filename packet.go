@@ -6,7 +6,7 @@ import (
 	"github.com/williamfhe/godivert/header"
 )
 
-// Packet : Represents a packet
+// Represents a packet
 type Packet struct {
 	Raw       []byte
 	Addr      *WinDivertAddress
@@ -22,7 +22,7 @@ type Packet struct {
 	parsed bool
 }
 
-// ParseHeaders : Parse the packet's headers
+// Parse the packet's headers
 func (p *Packet) ParseHeaders() {
 	p.ipVersion = int(p.Raw[0] >> 4)
 	if p.ipVersion == 4 {
@@ -72,15 +72,15 @@ func (p *Packet) IpVersion() int {
 	return p.ipVersion
 }
 
-// NextHeaderType : Returns the IP Protocol number of the next Header
-// See : https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
+// Returns the IP Protocol number of the next Header
+// https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
 func (p *Packet) NextHeaderType() uint8 {
 	p.VerifyParsed()
 
 	return p.nextHeaderType
 }
 
-// SrcIP : Returns the source IP of the packet
+// Returns the source IP of the packet
 // Shortcut for IpHdr.SrcIP()
 func (p *Packet) SrcIP() net.IP {
 	p.VerifyParsed()
@@ -88,7 +88,7 @@ func (p *Packet) SrcIP() net.IP {
 	return p.IpHdr.SrcIP()
 }
 
-// SetSrcIP : Sets the source IP of the packet
+// Sets the source IP of the packet
 // Shortcut for IpHdr.SetSrcIP()
 func (p *Packet) SetSrcIP(ip net.IP) {
 	p.VerifyParsed()
@@ -96,7 +96,7 @@ func (p *Packet) SetSrcIP(ip net.IP) {
 	p.IpHdr.SetSrcIP(ip)
 }
 
-// DstIP : Returns the destination IP of the packet
+// Returns the destination IP of the packet
 // Shortcut for IpHdr.DstIP()
 func (p *Packet) DstIP() net.IP {
 	p.VerifyParsed()
@@ -104,7 +104,7 @@ func (p *Packet) DstIP() net.IP {
 	return p.IpHdr.DstIP()
 }
 
-// SetDstIP : Sets the destination IP of the packet
+// Sets the destination IP of the packet
 // Shortcut for IpHdr.SetDstIP()
 func (p *Packet) SetDstIP(ip net.IP) {
 	p.VerifyParsed()
@@ -112,7 +112,7 @@ func (p *Packet) SetDstIP(ip net.IP) {
 	p.IpHdr.SetDstIP(ip)
 }
 
-// SrcPort : Returns the source port of the packet
+// Returns the source port of the packet
 // Shortcut for ProtocolHdr.SrcPort()
 func (p *Packet) SrcPort() (uint16, error) {
 	p.VerifyParsed()
@@ -124,7 +124,7 @@ func (p *Packet) SrcPort() (uint16, error) {
 	return p.ProtocolHdr.SrcPort()
 }
 
-// SetSrcPort : Sets the source port of the packet
+// Sets the source port of the packet
 // Shortcut for ProtocolHdr.SetSrcPort()
 func (p *Packet) SetSrcPort(port uint16) error {
 	p.VerifyParsed()
@@ -137,7 +137,7 @@ func (p *Packet) SetSrcPort(port uint16) error {
 
 }
 
-// DstPort : Returns the destination port of the packet
+// Returns the destination port of the packet
 // Shortcut for ProtocolHdr.DstPort()
 func (p *Packet) DstPort() (uint16, error) {
 	p.VerifyParsed()
@@ -149,7 +149,7 @@ func (p *Packet) DstPort() (uint16, error) {
 	return p.ProtocolHdr.DstPort()
 }
 
-// SetDstPort : Sets the destination port of the packet
+// Sets the destination port of the packet
 // Shortcut for ProtocolHdr.SetDstPort()
 func (p *Packet) SetDstPort(port uint16) error {
 	p.VerifyParsed()
@@ -161,13 +161,13 @@ func (p *Packet) SetDstPort(port uint16) error {
 	return p.ProtocolHdr.SetDstPort(port)
 }
 
-// NextHeaderProtocolName : Returns the name of the protocol
+// Returns the name of the protocol
 func (p *Packet) NextHeaderProtocolName() string {
 	return header.ProtocolName(p.NextHeaderType())
 }
 
-// Send : Inject the packet on the Network Stack
-// Verify if the packet has been modified it calls WinDivertHelperCalcChecksum to get a new checksum
+// Inject the packet on the Network Stack
+// If the packet has been modified calls WinDivertHelperCalcChecksum to get a new checksum
 func (p *Packet) Send(wd *WinDivertHandle) (uint, error) {
 	if p.parsed && (p.IpHdr.NeedNewChecksum() || p.ProtocolHdr != nil && p.ProtocolHdr.NeedNewChecksum()) {
 		wd.HelperCalcChecksum(p)
@@ -175,19 +175,20 @@ func (p *Packet) Send(wd *WinDivertHandle) (uint, error) {
 	return wd.Send(p)
 }
 
-// CalcNewChecksum : Calls WinDivertHelperCalcChecksum to get a new checksum
+// Recalculate the packet's checksum
+// Shortcut for WinDivertHelperCalcChecksum
 func (p *Packet) CalcNewChecksum(wd *WinDivertHandle) {
 	wd.HelperCalcChecksum(p)
 }
 
-// VerifyParsed : Check if the headers have already been parsed and call ParseHeaders() if not
+// Check if the headers have already been parsed and call ParseHeaders() if not
 func (p *Packet) VerifyParsed() {
 	if !p.parsed {
 		p.ParseHeaders()
 	}
 }
 
-// Direction : Returns the Direction of the packet
+// Returns the Direction of the packet
 // WinDivertDirectionInbound (true) for inbound Packets
 // WinDivertDirectionOutbound (false) for outbound packets
 // Shortcut for Addr.Direction()
@@ -195,7 +196,7 @@ func (p *Packet) Direction() Direction {
 	return p.Addr.Direction()
 }
 
-// EvalFilter : Check the packet with the filter
+// Check the packet with the filter
 // Returns true if the packet matches the filter
 func (p *Packet) EvalFilter(filter string) (bool, error) {
 	return HelperEvalFilter(p, filter)

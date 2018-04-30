@@ -43,14 +43,15 @@ func init() {
 
 }
 
-// WinDivertHandle : Used to call WinDivert's functions
+// Used to call WinDivert's functions
 type WinDivertHandle struct {
 	handle uintptr
 	open   bool
 }
 
-// NewWinDivertHandle : Create a new WinDivertHandle by calling WinDivertOpen and returns it
-// See : https://reqrypt.org/windivert-doc.html#divert_open
+// Create a new WinDivertHandle by calling WinDivertOpen and returns it
+// The string parameter is the fiter that packets have to match
+// https://reqrypt.org/windivert-doc.html#divert_open
 func NewWinDivertHandle(filter string) (*WinDivertHandle, error) {
 	filterBytePtr, err := syscall.BytePtrFromString(filter)
 	if err != nil {
@@ -73,16 +74,16 @@ func NewWinDivertHandle(filter string) (*WinDivertHandle, error) {
 	return winDivertHandle, nil
 }
 
-// Close : Calls WinDivertClose and close the WinDivertHandle
-// See : https://reqrypt.org/windivert-doc.html#divert_close
+// Close the Handle
+// See https://reqrypt.org/windivert-doc.html#divert_close
 func (wd *WinDivertHandle) Close() error {
 	_, _, err := winDivertClose.Call(wd.handle)
 	wd.open = false
 	return err
 }
 
-// Recv : Calls WinDivertRecv and returns the packet
-// See : https://reqrypt.org/windivert-doc.html#divert_recv
+// Divert a packet from the Network Stack
+// https://reqrypt.org/windivert-doc.html#divert_recv
 func (wd *WinDivertHandle) Recv() (*Packet, error) {
 	if !wd.open {
 		return nil, errors.New("can't receive, the handle isn't open")
@@ -111,8 +112,8 @@ func (wd *WinDivertHandle) Recv() (*Packet, error) {
 	return packet, nil
 }
 
-// Send : Inject the packet on the NetWork Stack
-// See : https://reqrypt.org/windivert-doc.html#divert_send
+// Inject the packet on the Network Stack
+// https://reqrypt.org/windivert-doc.html#divert_send
 func (wd *WinDivertHandle) Send(packet *Packet) (uint, error) {
 	var sendLen uint
 
@@ -133,9 +134,8 @@ func (wd *WinDivertHandle) Send(packet *Packet) (uint, error) {
 	return sendLen, nil
 }
 
-// HelperCalcChecksum : Calls WinDivertHelperCalcChecksum
-// Recalculate the packet's checksum
-// See : https://reqrypt.org/windivert-doc.html#divert_helper_calc_checksums
+// Calls WinDivertHelperCalcChecksum to calculate the packet's chacksum
+// https://reqrypt.org/windivert-doc.html#divert_helper_calc_checksums
 func (wd *WinDivertHandle) HelperCalcChecksum(packet *Packet) {
 	winDivertHelperCalcChecksums.Call(
 		uintptr(unsafe.Pointer(&packet.Raw[0])),
@@ -144,9 +144,8 @@ func (wd *WinDivertHandle) HelperCalcChecksum(packet *Packet) {
 		uintptr(0))
 }
 
-// HelperCheckFilter : Calls WinDivertHelperCheckFilter
 // Take the given filter and check if it contains any error
-// See : https://reqrypt.org/windivert-doc.html#divert_helper_check_filter
+// https://reqrypt.org/windivert-doc.html#divert_helper_check_filter
 func HelperCheckFilter(filter string) (bool, int) {
 	var errorPos uint
 
@@ -164,10 +163,9 @@ func HelperCheckFilter(filter string) (bool, int) {
 	return false, int(errorPos)
 }
 
-// HelperEvalFilter : Calls WinDivertHelperEvalFilter
 // Take a packet and compare it with the given filter
 // Returns true if the packet matches the filter
-// See : https://reqrypt.org/windivert-doc.html#divert_helper_eval_filter
+// https://reqrypt.org/windivert-doc.html#divert_helper_eval_filter
 func HelperEvalFilter(packet *Packet, filter string) (bool, error) {
 	filterBytePtr, err := syscall.BytePtrFromString(filter)
 	if err != nil {
@@ -188,8 +186,7 @@ func HelperEvalFilter(packet *Packet, filter string) (bool, error) {
 	return true, nil
 }
 
-// recvLoop : A loop that capture packets by calling Recv
-// and sends them on a channel as long as the handle is open
+// A loop that capture packets by calling Recv and sends them on a channel as long as the handle is open
 // If Recv() returns an error, the loop is stopped and the channel is closed
 func (wd *WinDivertHandle) recvLoop(packetChan chan<- *Packet) {
 	for wd.open {
@@ -203,8 +200,7 @@ func (wd *WinDivertHandle) recvLoop(packetChan chan<- *Packet) {
 	}
 }
 
-// Packets : Create a new channel that will be used to pass captured packets and returns it
-// Calls recvLoop to maintain a loop
+// Create a new channel that will be used to pass captured packets and returns it calls recvLoop to maintain a loop
 func (wd *WinDivertHandle) Packets() (chan *Packet, error) {
 	if !wd.open {
 		return nil, errors.New("the handle isn't open")

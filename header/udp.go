@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// UDPHeader : Represents a UDP header
-// See : https://en.wikipedia.org/wiki/User_Datagram_Protocol#Packet_structure
+// Represents a UDP header
+// https://en.wikipedia.org/wiki/User_Datagram_Protocol#Packet_structure
 type UDPHeader struct {
 	Raw      []byte
 	Modified bool
@@ -36,22 +36,22 @@ func (h *UDPHeader) String() string {
 		"\t}", srcPort, dstPort, h.HeaderLen(), h.Len(), h.Checksum())
 }
 
-// HeaderLen : Returns the length of the header in bytes (8 bytes)
+// Returns the length of the header in bytes (8 bytes)
 func (h *UDPHeader) HeaderLen() uint8 {
 	return UDPHeaderLen
 }
 
-// SrcPort : Reads the header's bytes and returns the source port
+// Reads the header's bytes and returns the source port
 func (h *UDPHeader) SrcPort() (uint16, error) {
 	return binary.BigEndian.Uint16(h.Raw[0:2]), nil
 }
 
-// DstPort : Reads the header's bytes and returns the destination port
+// Reads the header's bytes and returns the destination port
 func (h *UDPHeader) DstPort() (uint16, error) {
 	return binary.BigEndian.Uint16(h.Raw[2:4]), nil
 }
 
-// SetSrcPort : Sets the source port
+// Sets the source port
 func (h *UDPHeader) SetSrcPort(port uint16) error {
 	h.Modified = true
 	h.Raw[0] = uint8(port >> 8)
@@ -59,7 +59,7 @@ func (h *UDPHeader) SetSrcPort(port uint16) error {
 	return nil
 }
 
-// SetDstPort : Sets the destination port
+// Sets the destination port
 func (h *UDPHeader) SetDstPort(port uint16) error {
 	h.Modified = true
 	h.Raw[2] = uint8(port >> 8)
@@ -67,17 +67,17 @@ func (h *UDPHeader) SetDstPort(port uint16) error {
 	return nil
 }
 
-// Len : Reads the header and returns the length of UDP header and UDP data in bytes
+// Reads the header and returns the length of UDP header and UDP data in bytes
 func (h *UDPHeader) Len() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[4:6])
 }
 
-// Checksum : Reads the header's bytes and returns the checksum
+// Reads the header's bytes and returns the checksum
 func (h *UDPHeader) Checksum() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[6:8])
 }
 
-// NeedNewChecksum : Returns true if the header has been modified
+// Returns true if the header has been modified
 func (h *UDPHeader) NeedNewChecksum() bool {
 	return h.Modified
 }

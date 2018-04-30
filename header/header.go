@@ -2,7 +2,7 @@ package header
 
 import "net"
 
-// IPHeader : Represents a IPv4 or IPv4 Header
+// Represents a IPv4 or IPv6 Header
 type IPHeader interface {
 	String() string
 
@@ -17,7 +17,7 @@ type IPHeader interface {
 	NeedNewChecksum() bool
 }
 
-// ProtocolHeader : Represents a protocol header
+// Represents a protocol header
 // Supported headers are TCP, UDP, ICMPv4, ICMPv6
 type ProtocolHeader interface {
 	String() string
@@ -31,7 +31,7 @@ type ProtocolHeader interface {
 	NeedNewChecksum() bool
 }
 
-// ProtocolName : Returns the name of the given protocol number
+// Returns the name of the given protocol number
 // See : https://en.wikipedia.org/wiki/List_of_IP_protocol_numbers
 func ProtocolName(protocol uint8) string {
 	switch protocol {

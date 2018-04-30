@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// TCPHeader : Represents a TCP header
-// See : https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure
+// Represents a TCP header
+// https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_segment_structure
 type TCPHeader struct {
 	Raw      []byte
 	Modified bool
@@ -44,17 +44,17 @@ func (h *TCPHeader) String() string {
 		srcPort, dstPort, h.SeqNum(), h.AckNum(), h.HeaderLen(), h.Reserved(), h.NS(), h.CWR(), h.ECE(), h.URG(), h.ACK(), h.PSH(), h.RST(), h.SYN(), h.FIN(), h.Window(), h.Checksum(), h.UrgPtr(), h.Options())
 }
 
-// SrcPort : Reads the header's bytes and returns the source port
+// Reads the header's bytes and returns the source port
 func (h *TCPHeader) SrcPort() (uint16, error) {
 	return binary.BigEndian.Uint16(h.Raw[0:2]), nil
 }
 
-// DstPort : Reads the header's bytes and returns the destination port
+// Reads the header's bytes and returns the destination port
 func (h *TCPHeader) DstPort() (uint16, error) {
 	return binary.BigEndian.Uint16(h.Raw[2:4]), nil
 }
 
-// SetSrcPort : Sets the source port
+// Sets the source port
 func (h *TCPHeader) SetSrcPort(port uint16) error {
 	h.Modified = true
 	h.Raw[0] = uint8(port >> 8)
@@ -62,7 +62,7 @@ func (h *TCPHeader) SetSrcPort(port uint16) error {
 	return nil
 }
 
-// SetDstPort : Sets the destination port
+// Sets the destination port
 func (h *TCPHeader) SetDstPort(port uint16) error {
 	h.Modified = true
 	h.Raw[2] = uint8(port >> 8)
@@ -70,92 +70,92 @@ func (h *TCPHeader) SetDstPort(port uint16) error {
 	return nil
 }
 
-// SeqNum : Reads the header's bytes and returns the sequence number
+// Reads the header's bytes and returns the sequence number
 func (h *TCPHeader) SeqNum() uint32 {
 	return binary.BigEndian.Uint32(h.Raw[4:8])
 }
 
-// AckNum : Reads the header's bytes and returns the acknowledgment number
+// Reads the header's bytes and returns the acknowledgment number
 func (h *TCPHeader) AckNum() uint32 {
 	return binary.BigEndian.Uint32(h.Raw[8:12])
 }
 
-// HeaderLen : Reads the header's bytes and returns the length of the header in bytes
+// Reads the header's bytes and returns the length of the header in bytes
 func (h *TCPHeader) HeaderLen() uint8 {
 	return h.Raw[12] >> 2
 }
 
-// Reserved : Reads the header's bytes and returns the reserved part
+// Reads the header's bytes and returns the reserved part
 func (h *TCPHeader) Reserved() uint8 {
 	return (h.Raw[12] >> 3) & 0x7
 }
 
 // FLAGS START
 
-// NS : Reads the header's bytes and returns the NS flag as a boolean
+// Reads the header's bytes and returns the NS flag as a boolean
 func (h *TCPHeader) NS() bool {
 	return h.Raw[12]&0x1 == 1
 }
 
-// CWR : Reads the header's bytes and returns the CWR as a boolean
+// Reads the header's bytes and returns the CWR as a boolean
 func (h *TCPHeader) CWR() bool {
 	return h.Raw[13]>>7 == 1
 }
 
-// ECE : Reads the header's bytes and returns the ECE flag as a boolean
+// Reads the header's bytes and returns the ECE flag as a boolean
 func (h *TCPHeader) ECE() bool {
 	return (h.Raw[13]>>6)&0x1 == 1
 }
 
-// URG : Reads the header's bytes and returns the URG flag as a boolean
+// Reads the header's bytes and returns the URG flag as a boolean
 func (h *TCPHeader) URG() bool {
 	return (h.Raw[13]>>5)&0x1 == 1
 }
 
-// ACK : Reads the header's bytes and returns the ACK flag as a boolean
+// Reads the header's bytes and returns the ACK flag as a boolean
 func (h *TCPHeader) ACK() bool {
 	return (h.Raw[13]>>4)&0x1 == 1
 }
 
-// PSH : Reads the header's bytes and returns the PSH flag as a boolean
+// Reads the header's bytes and returns the PSH flag as a boolean
 func (h *TCPHeader) PSH() bool {
 	return (h.Raw[13]>>3)&0x1 == 1
 }
 
-// RST : Reads the header's bytes and returns the RST flag as a boolean
+// Reads the header's bytes and returns the RST flag as a boolean
 func (h *TCPHeader) RST() bool {
 	return (h.Raw[13]>>2)&0x1 == 1
 
 }
 
-// SYN : Reads the header's bytes and returns the SYN flag as a boolean
+// Reads the header's bytes and returns the SYN flag as a boolean
 func (h *TCPHeader) SYN() bool {
 	return (h.Raw[13]>>1)&0x1 == 1
 }
 
-// FIN : Reads the header's bytes and returns the FIN flag as a boolean
+// Reads the header's bytes and returns the FIN flag as a boolean
 func (h *TCPHeader) FIN() bool {
 	return h.Raw[13]&0x1 == 1
 }
 
 // END FLAGS
 
-// Window : Reads the header's bytes and returns the window size
+// Reads the header's bytes and returns the window size
 func (h *TCPHeader) Window() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[14:16])
 }
 
-// Checksum : Reads the header's bytes and returns the checksum
+// Reads the header's bytes and returns the checksum
 func (h *TCPHeader) Checksum() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[16:18])
 }
 
-// UrgPtr :  : Reads the header's bytes and returns the urgent pointer field
+// Reads the header's bytes and returns the urgent pointer field
 func (h *TCPHeader) UrgPtr() uint16 {
 	return binary.BigEndian.Uint16(h.Raw[18:20])
 }
 
-// Options : Reads the header's bytes and returns the options as a byte slice if they exist or nil
+// Reads the header's bytes and returns the options as a byte slice if they exist or nil
 func (h *TCPHeader) Options() []byte {
 	hdrLen := h.HeaderLen()
 	if hdrLen == 20 {
@@ -164,7 +164,7 @@ func (h *TCPHeader) Options() []byte {
 	return h.Raw[TCPHeaderLen:hdrLen]
 }
 
-// NeedNewChecksum : Returns true if the header has been modified
+// Returns true if the header has been modified
 func (h *TCPHeader) NeedNewChecksum() bool {
 	return h.Modified
 }
