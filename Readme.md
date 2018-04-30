@@ -54,7 +54,7 @@ Here **_packetChan_** is a channel of **\*godivert.Packet** coming directly from
 
 Note that all packets diverted are guaranteed to match the filter given in **godivert.NewWinDivertHandle("You filter here")**
 
-## Example
+## Examples
 
 ```go
 package main
