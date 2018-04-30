@@ -2,11 +2,57 @@
 
 Go bindings for [WinDivert](https://github.com/basil00/Divert).
 
+WinDivert is a user-mode packet capture-and-divert package for Windows.
+
 ## Installation
 
 ```bash
 go get github.com/williamfhe/godivert
 ```
+
+## Introduction
+
+The binding's documentation can be found [Here](https://godoc.org/github.com/williamfhe/godivert).
+
+To start create a new instance of **WinDivertHandle** by calling **NewWinDivertHandle** and passing the filter as a parameter.
+
+Documentation of the **filter** can be found [Here](https://reqrypt.org/windivert-doc.html#filter_language).
+
+```go
+winDivert, err := godivert.NewWinDivertHandle("Your filter here")
+```
+
+**WinDivertHandle** is struct that you can use to call WinDivert's function like **Recv** or **Send**.
+
+You can divert a packet from the network stack by using **winDivert.Recv()** where **winDivert** is an instance of **WinDivertHandle**.
+
+```go
+packet, err := winDivert.Recv()
+```
+
+You can then choose to send the packet or modify it.
+
+```go
+packet.SetDstPort(1234) // Set the destination port
+packet.Send(winDivert) // Send the packet back on the network stack
+```
+
+You can get and set values from the packet's header by using the **_header_** package. Documentation on this package can be found [Here](https://godoc.org/github.com/williamfhe/godivert/header)
+.
+
+As the packet has been modified the **checksums** have to be recalculated before sending it back on the network stack.
+
+It is done automatically if the packet has been modified when calling **packet.Send** but you can do it manually by calling **packet.CalcNewChecksum**.
+
+To receive packets you can also use **winDivert.Packets**.
+
+```go
+packetChan, err := winDivert.Packets()
+```
+
+Here **_packetChan_** is a channel of **\*godivert.Packet** coming directly from the network stack.
+
+Note that all packets diverted are guaranteed to match the filter given in **godivert.NewWinDivertHandle("You filter here")**
 
 ## Example
 
