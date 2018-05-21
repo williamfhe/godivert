@@ -14,6 +14,17 @@ go get github.com/williamfhe/godivert
 
 The binding's documentation can be found [Here](https://godoc.org/github.com/williamfhe/godivert).
 
+If you don't have the **WinDivert dll** installed on your System or you want to load a specific **WinDivert dll** you should do :
+
+```go
+godivert.LoadDLL("PathToThe64bitDLL", "PathToThe32bitDLL")
+```
+
+The path can be a **relative path** to the *.exe* **current directory** or an **absolute path**.
+
+Note that the driver must be in the **same directory** as the **dll**.
+**LoadDLL** will then load the **dll** depending on your **OS architecture**.
+
 To start create a new instance of **WinDivertHandle** by calling **NewWinDivertHandle** and passing the filter as a parameter.
 
 Documentation of the **filter** can be found [Here](https://reqrypt.org/windivert-doc.html#filter_language).
@@ -185,11 +196,9 @@ func main() {
         panic(err)
     }
 
-
     n := 50
     for i := 0; i < n; i++ {
         go checkPacket(winDivert, packetChan)
-
     }
 
     time.Sleep(15 * time.Second)

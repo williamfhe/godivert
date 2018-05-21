@@ -5,7 +5,6 @@ import (
 	"syscall"
 	"unsafe"
 	"runtime"
-	"path/filepath"
 )
 
 var (
@@ -21,17 +20,28 @@ var (
 )
 
 func init() {
-	_, p, _, _ := runtime.Caller(0)
-	basepath := filepath.Dir(p)
+	LoadDLL("WinDivert.dll", "WinDivert.dll")
+}
+
+// Used to call WinDivert's functions
+type WinDivertHandle struct {
+	handle uintptr
+	open   bool
+}
+
+
+// LoadDLL loads the WinDivert DLL depending the OS (x64 or x86) and the given DLL path.
+// The path can be a relative path (from the .exe folder) or absolute path.
+func LoadDLL(path64, path32 string) {
 	var dllPath string
 
 	if runtime.GOARCH == "amd64" {
-		dllPath = "dll\\x86_64\\WinDivert.dll"
+		dllPath = path64
 	} else {
-		dllPath = "dll\\x86\\WinDivert.dll"
+		dllPath = path32
 	}
 
-	winDivertDLL = syscall.NewLazyDLL(filepath.Join(basepath, dllPath))
+	winDivertDLL = syscall.NewLazyDLL(dllPath)
 
 	winDivertOpen = winDivertDLL.NewProc("WinDivertOpen")
 	winDivertClose = winDivertDLL.NewProc("WinDivertClose")
@@ -40,14 +50,8 @@ func init() {
 	winDivertHelperCalcChecksums = winDivertDLL.NewProc("WinDivertHelperCalcChecksums")
 	winDivertHelperEvalFilter = winDivertDLL.NewProc("WinDivertHelperEvalFilter")
 	winDivertHelperCheckFilter = winDivertDLL.NewProc("WinDivertHelperCheckFilter")
-
 }
 
-// Used to call WinDivert's functions
-type WinDivertHandle struct {
-	handle uintptr
-	open   bool
-}
 
 // Create a new WinDivertHandle by calling WinDivertOpen and returns it
 // The string parameter is the fiter that packets have to match
