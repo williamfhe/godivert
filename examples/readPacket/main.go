@@ -10,6 +10,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer winDivert.Close()
 
 	packet, err := winDivert.Recv()
 	if err != nil {
@@ -19,6 +20,4 @@ func main() {
 	fmt.Println(packet)
 
     packet.Send(winDivert)
-
-	winDivert.Close()
 }

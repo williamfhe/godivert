@@ -87,12 +87,12 @@ func main() {
     if err != nil {
         panic(err)
     }
+    defer winDivert.Close()
 
     fmt.Println(packet)
 
     packet.Send(winDivert)
 
-    winDivert.Close()
 }
 ```
 
@@ -124,6 +124,7 @@ func main() {
     if err != nil {
         panic(err)
     }
+    defer winDivert.Close()
 
     packetChan, err := winDivert.Packets()
     if err != nil {
@@ -133,7 +134,6 @@ func main() {
     go checkPacket(winDivert, packetChan)
 
     time.Sleep(1 * time.Minute)
-    winDivert.Close()
 }
 ```
 
@@ -190,7 +190,7 @@ func main() {
     }
 
     fmt.Println("Starting")
-
+    defer winDivert.Close()
     packetChan, err := winDivert.Packets()
     if err != nil {
         panic(err)
@@ -203,7 +203,6 @@ func main() {
 
     time.Sleep(15 * time.Second)
 
-    winDivert.Close()
     fmt.Println("Stopping...")
 
     fmt.Printf("Served: %d packets\n", served)

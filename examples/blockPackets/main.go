@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer winDivert.Close()
 
 	packetChan, err := winDivert.Packets()
 	if err != nil {
@@ -30,5 +31,4 @@ func main() {
 	go checkPacket(winDivert, packetChan)
 
 	time.Sleep(1 * time.Minute)
-	winDivert.Close()
 }

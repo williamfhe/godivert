@@ -45,6 +45,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer winDivert.Close()
 
 
 	n := 50
@@ -55,7 +56,6 @@ func main() {
 
 	time.Sleep(15 * time.Second)
 
-	winDivert.Close()
 	fmt.Println("Stopping...")
 
 	fmt.Printf("Served: %d packets\n", served)
