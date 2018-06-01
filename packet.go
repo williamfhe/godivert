@@ -2,8 +2,8 @@ package godivert
 
 import (
 	"fmt"
-	"net"
 	"github.com/williamfhe/godivert/header"
+	"net"
 )
 
 // Represents a packet
@@ -12,8 +12,8 @@ type Packet struct {
 	Addr      *WinDivertAddress
 	PacketLen uint
 
-	IpHdr       header.IPHeader
-	ProtocolHdr header.ProtocolHeader
+	IpHdr      header.IPHeader
+	NextHeader header.ProtocolHeader
 
 	ipVersion      int
 	hdrLen         int
@@ -37,16 +37,16 @@ func (p *Packet) ParseHeaders() {
 
 	switch p.nextHeaderType {
 	case header.ICMPv4:
-		p.ProtocolHdr = header.NewICMPv4Header(p.Raw[p.hdrLen : p.hdrLen+header.ICMPv4HeaderLen])
+		p.NextHeader = header.NewICMPv4Header(p.Raw[p.hdrLen : p.hdrLen+header.ICMPv4HeaderLen])
 	case header.TCP:
-		p.ProtocolHdr = header.NewTCPHeader(p.Raw[p.hdrLen:])
+		p.NextHeader = header.NewTCPHeader(p.Raw[p.hdrLen:])
 	case header.UDP:
-		p.ProtocolHdr = header.NewUDPHeader(p.Raw[p.hdrLen : p.hdrLen+header.UDPHeaderLen])
+		p.NextHeader = header.NewUDPHeader(p.Raw[p.hdrLen : p.hdrLen+header.UDPHeaderLen])
 	case header.ICMPv6:
-		p.ProtocolHdr = header.NewICMPv6Header(p.Raw[p.hdrLen : p.hdrLen+header.ICMPv6HeaderLen])
+		p.NextHeader = header.NewICMPv6Header(p.Raw[p.hdrLen : p.hdrLen+header.ICMPv6HeaderLen])
 	default:
 		// Protocol not implemented
-		p.ProtocolHdr = nil
+		p.NextHeader = nil
 	}
 
 	p.parsed = true
@@ -63,7 +63,7 @@ func (p *Packet) String() string {
 		"\tWinDivertAddr=%v\n"+
 		"\tRawData=%v\n"+
 		"}",
-		p.IpHdr, nextHeaderType, header.ProtocolName(nextHeaderType), p.ProtocolHdr, p.Addr, p.Raw)
+		p.IpHdr, nextHeaderType, header.ProtocolName(nextHeaderType), p.NextHeader, p.Addr, p.Raw)
 }
 
 // Returns the version of the IP protocol
@@ -113,52 +113,52 @@ func (p *Packet) SetDstIP(ip net.IP) {
 }
 
 // Returns the source port of the packet
-// Shortcut for ProtocolHdr.SrcPort()
+// Shortcut for NextHeader.SrcPort()
 func (p *Packet) SrcPort() (uint16, error) {
 	p.VerifyParsed()
 
-	if p.ProtocolHdr == nil {
+	if p.NextHeader == nil {
 		return 0, fmt.Errorf("cannot get source port on protocolID=%d, protocol not implemented", p.nextHeaderType)
 	}
 
-	return p.ProtocolHdr.SrcPort()
+	return p.NextHeader.SrcPort()
 }
 
 // Sets the source port of the packet
-// Shortcut for ProtocolHdr.SetSrcPort()
+// Shortcut for NextHeader.SetSrcPort()
 func (p *Packet) SetSrcPort(port uint16) error {
 	p.VerifyParsed()
 
-	if p.ProtocolHdr == nil {
+	if p.NextHeader == nil {
 		return fmt.Errorf("cannot change source port on protocolID=%d, protocol not implemented", p.nextHeaderType)
 	}
 
-	return p.ProtocolHdr.SetSrcPort(port)
+	return p.NextHeader.SetSrcPort(port)
 
 }
 
 // Returns the destination port of the packet
-// Shortcut for ProtocolHdr.DstPort()
+// Shortcut for NextHeader.DstPort()
 func (p *Packet) DstPort() (uint16, error) {
 	p.VerifyParsed()
 
-	if p.ProtocolHdr == nil {
+	if p.NextHeader == nil {
 		return 0, fmt.Errorf("cannot change get port on protocolID=%d, protocol not implemented", p.nextHeaderType)
 	}
 
-	return p.ProtocolHdr.DstPort()
+	return p.NextHeader.DstPort()
 }
 
 // Sets the destination port of the packet
-// Shortcut for ProtocolHdr.SetDstPort()
+// Shortcut for NextHeader.SetDstPort()
 func (p *Packet) SetDstPort(port uint16) error {
 	p.VerifyParsed()
 
-	if p.ProtocolHdr == nil {
+	if p.NextHeader == nil {
 		return fmt.Errorf("cannot change destination port on protocolID=%d, protocol not implemented", p.nextHeaderType)
 	}
 
-	return p.ProtocolHdr.SetDstPort(port)
+	return p.NextHeader.SetDstPort(port)
 }
 
 // Returns the name of the protocol
@@ -169,7 +169,7 @@ func (p *Packet) NextHeaderProtocolName() string {
 // Inject the packet on the Network Stack
 // If the packet has been modified calls WinDivertHelperCalcChecksum to get a new checksum
 func (p *Packet) Send(wd *WinDivertHandle) (uint, error) {
-	if p.parsed && (p.IpHdr.NeedNewChecksum() || p.ProtocolHdr != nil && p.ProtocolHdr.NeedNewChecksum()) {
+	if p.parsed && (p.IpHdr.NeedNewChecksum() || p.NextHeader != nil && p.NextHeader.NeedNewChecksum()) {
 		wd.HelperCalcChecksum(p)
 	}
 	return wd.Send(p)

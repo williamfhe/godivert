@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"time"
 	"github.com/williamfhe/godivert"
 	"github.com/williamfhe/godivert/header"
+	"time"
 )
 
 var icmpv4, icmpv6, udp, tcp, unknown, served uint
 
-func checkPacket(wd *godivert.WinDivertHandle, packetChan  <- chan *godivert.Packet) {
+func checkPacket(wd *godivert.WinDivertHandle, packetChan <-chan *godivert.Packet) {
 	for packet := range packetChan {
 		countPacket(packet)
 		wd.Send(packet)
@@ -32,7 +32,6 @@ func countPacket(packet *godivert.Packet) {
 	}
 }
 
-
 func main() {
 	winDivert, err := godivert.NewWinDivertHandle("true")
 	if err != nil {
@@ -47,11 +46,9 @@ func main() {
 	}
 	defer winDivert.Close()
 
-
 	n := 50
 	for i := 0; i < n; i++ {
 		go checkPacket(winDivert, packetChan)
-
 	}
 
 	time.Sleep(15 * time.Second)

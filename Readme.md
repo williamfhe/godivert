@@ -191,6 +191,7 @@ func main() {
 
     fmt.Println("Starting")
     defer winDivert.Close()
+
     packetChan, err := winDivert.Packets()
     if err != nil {
         panic(err)
