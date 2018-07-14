@@ -2,9 +2,9 @@ package godivert
 
 import (
 	"errors"
+	"runtime"
 	"syscall"
 	"unsafe"
-	"runtime"
 )
 
 var (
@@ -29,7 +29,6 @@ type WinDivertHandle struct {
 	open   bool
 }
 
-
 // LoadDLL loads the WinDivert DLL depending the OS (x64 or x86) and the given DLL path.
 // The path can be a relative path (from the .exe folder) or absolute path.
 func LoadDLL(path64, path32 string) {
@@ -52,11 +51,18 @@ func LoadDLL(path64, path32 string) {
 	winDivertHelperCheckFilter = winDivertDLL.NewProc("WinDivertHelperCheckFilter")
 }
 
-
 // Create a new WinDivertHandle by calling WinDivertOpen and returns it
 // The string parameter is the fiter that packets have to match
 // https://reqrypt.org/windivert-doc.html#divert_open
 func NewWinDivertHandle(filter string) (*WinDivertHandle, error) {
+	return NewWinDivertHandleWithFlags(filter, 0)
+}
+
+// Create a new WinDivertHandle by calling WinDivertOpen and returns it
+// The string parameter is the fiter that packets have to match
+// and flags are the used flags used
+// https://reqrypt.org/windivert-doc.html#divert_open
+func NewWinDivertHandleWithFlags(filter string, flags uint8) (*WinDivertHandle, error) {
 	filterBytePtr, err := syscall.BytePtrFromString(filter)
 	if err != nil {
 		return nil, err
@@ -65,7 +71,7 @@ func NewWinDivertHandle(filter string) (*WinDivertHandle, error) {
 	handle, _, err := winDivertOpen.Call(uintptr(unsafe.Pointer(filterBytePtr)),
 		uintptr(0),
 		uintptr(0),
-		uintptr(0))
+		uintptr(flags))
 
 	if handle == uintptr(syscall.InvalidHandle) {
 		return nil, err
