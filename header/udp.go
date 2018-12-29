@@ -37,7 +37,7 @@ func (h *UDPHeader) String() string {
 }
 
 // Returns the length of the header in bytes (8 bytes)
-func (h *UDPHeader) HeaderLen() uint8 {
+func (h *UDPHeader) HeaderLen() int {
 	return UDPHeaderLen
 }
 

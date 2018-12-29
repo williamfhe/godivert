@@ -13,7 +13,7 @@ type TCPHeader struct {
 }
 
 func NewTCPHeader(raw []byte) *TCPHeader {
-	hdrLen := raw[12] >> 2
+	hdrLen := (raw[12] >> 4) * 4
 	return &TCPHeader{
 		Raw: raw[:hdrLen],
 	}
@@ -81,8 +81,13 @@ func (h *TCPHeader) AckNum() uint32 {
 }
 
 // Reads the header's bytes and returns the length of the header in bytes
-func (h *TCPHeader) HeaderLen() uint8 {
-	return h.Raw[12] >> 2
+func (h *TCPHeader) HeaderLen() int {
+	return int(h.DataOffset()) * 4
+}
+
+// Reads the header's bytes and returns the data offset
+func (h *TCPHeader) DataOffset() uint8 {
+	return h.Raw[12] >> 4
 }
 
 // Reads the header's bytes and returns the reserved part
@@ -158,7 +163,7 @@ func (h *TCPHeader) UrgPtr() uint16 {
 // Reads the header's bytes and returns the options as a byte slice if they exist or nil
 func (h *TCPHeader) Options() []byte {
 	hdrLen := h.HeaderLen()
-	if hdrLen == 20 {
+	if hdrLen <= TCPHeaderLen {
 		return nil
 	}
 	return h.Raw[TCPHeaderLen:hdrLen]

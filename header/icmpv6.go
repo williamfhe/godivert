@@ -76,7 +76,7 @@ func (h *ICMPv6Header) Checksum() uint16 {
 }
 
 // Returns the length of the header in bytes (8 bytes)
-func (h *ICMPv6Header) HeaderLen() uint8 {
+func (h *ICMPv6Header) HeaderLen() int {
 	return ICMPv6HeaderLen
 }
 

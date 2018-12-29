@@ -22,7 +22,7 @@ type IPHeader interface {
 type ProtocolHeader interface {
 	String() string
 
-	HeaderLen() uint8
+	HeaderLen() int
 	Checksum() uint16
 	SrcPort() (uint16, error)
 	DstPort() (uint16, error)
