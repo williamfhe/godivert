@@ -92,7 +92,7 @@ func (h *TCPHeader) DataOffset() uint8 {
 
 // Reads the header's bytes and returns the reserved part
 func (h *TCPHeader) Reserved() uint8 {
-	return (h.Raw[12] >> 3) & 0x7
+	return (h.Raw[12] >> 1) & 0x7
 }
 
 // FLAGS START
